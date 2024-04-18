@@ -1,0 +1,23 @@
+# Compiled Dynamic libraries
+*.so
+*.dylib
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Folders
+build/*
+
+# VS related files
+.vscode/*
+
+# resources 
+resources/*
