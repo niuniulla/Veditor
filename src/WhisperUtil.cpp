@@ -129,7 +129,7 @@ namespace util
     void WhisperCTX::stream(CircularBuffer *buffer, StreamOptions &ops, std::string& out)
     {
         out = "";
-        std::vector<float> pcmf32(m_streamBufferSize, 0);
+        std::vector<float> pcmf32(m_sampleRate*ops.lengthSecond, 0);
         bool bReadyForInference = false;
         
         if (buffer->getResLen() >= m_streamBufferSize)

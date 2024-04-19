@@ -81,6 +81,7 @@ namespace util
     {
         bool useVad = true;
         bool useFilter = true;
+        bool changeLen = false;
         float vadThreshold = -50.0f;
         float filterLow = 20.0f;
         float filterHigh = 200.0f;

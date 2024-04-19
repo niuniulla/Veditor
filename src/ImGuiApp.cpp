@@ -494,7 +494,13 @@ namespace application
                 ImGui::SliderFloat("low limit 0-100", &(m_inputHandler.getStreamOption().filterLow), 0.0f, 100.0f);
                 ImGui::SliderFloat("high limit 100-200", &(m_inputHandler.getStreamOption().filterHigh), 100.0f, 200.0f);
             }
-            
+
+            ImGui::Checkbox("Change buffer", &(m_inputHandler.getStreamOption().changeLen));
+            if (m_inputHandler.getStreamOption().changeLen == true)
+            {
+                ImGui::SliderInt("seconds 1-10", &(m_inputHandler.getStreamOption().lengthSecond), 1, 10);
+            }
+
             ImGui::End();
         }
     }
