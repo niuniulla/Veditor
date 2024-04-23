@@ -177,6 +177,16 @@ namespace veditor
     void Editor::deleteChar(bool forward)
     {
         m_vecDocument[m_activeID]->removeChar(m_vecCursor[m_activeID]->getNumLine(), m_vecCursor[m_activeID]->getNumChar(), forward);
+        if (!forward)
+        {
+            moveCurLeft();
+        }
+    }
+
+    void Editor::deleteSelected()
+    {
+        std::vector<size_t> rect = m_vecCursor[m_activeID]->getSelectRect();
+        m_vecDocument[m_activeID]->removeText(rect[0], rect[1], rect[2], rect[3]);
     }
 
     std::pair<size_t, size_t> Editor::getCurPos() const

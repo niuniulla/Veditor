@@ -14,7 +14,7 @@ namespace veditor
             ~Cursor() = default;
             size_t getNumLine() const {return m_nLine;};
             size_t getNumChar() const {return m_nChar;};
-            std::vector<int> getSelectRect() const {return m_selectRect;};
+            std::vector<size_t> getSelectRect() const {return m_selectRect;};
             
             void moveUp(size_t futureCharN);
             void moveDown(size_t futureCharN);
@@ -31,7 +31,7 @@ namespace veditor
         private:
             size_t m_nLine;
             size_t m_nChar;
-            std::vector<int> m_selectRect;
+            std::vector<size_t> m_selectRect;
             size_t m_originalNChar;
 
     };

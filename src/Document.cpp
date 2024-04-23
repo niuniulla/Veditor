@@ -12,7 +12,7 @@ namespace veditor
         m_LineCount {0},
         m_file {path}
     {
-        m_vecLines.push_back(LineInfo{0, 0, false});
+        m_vecLineInfo.push_back(LineInfo{0, 0, false});
         m_text = "";
 
     }
@@ -22,11 +22,12 @@ namespace veditor
 
     }
 
+    std::map<std::string, std::string> Document::m_specialChars = {{"\t", "    "}};
 
     void Document::init()
     {
         m_LineCount = 1;
-        m_vecLines.push_back(LineInfo{0, 0, false});
+        m_vecLineInfo.push_back(LineInfo{0, 0, false});
     }
 
     void Document::rename(std::string name)
@@ -59,61 +60,83 @@ namespace veditor
         outf.close();
     }
 
+    // insert char
     void Document::addChar(const char c, const size_t nLine, const size_t nChar)
     {
-        if (nLine == m_LineCount)
-        {
-            m_text.push_back(c);
-        }
         size_t pos = getStringPos(nLine, nChar);
-        m_text.append(pos, c);
+        m_text.insert(pos, 1, c);
+        m_bHasChanged = true;
         updateCounts();
     }
 
+    // insert string
     void Document::addText(const std::string str, const size_t nLine, const size_t nChar)
     {
-        if (nLine == m_LineCount)
-        {
-            m_text.append(str);
-        }
-        else
-        {
-            size_t pos = getStringPos(nLine, nChar);
+        size_t pos = getStringPos(nLine, nChar);
 
-            m_text.insert(pos, str);
-        }
-        
+        m_text.insert(pos, str);
+
+        m_bHasChanged = true;
         updateCounts();  
     }
 
+    // remove a char at a pos
     void Document::removeChar(const size_t nLine, const size_t nChar, const bool forward)
     {
-        if (forward)
+        size_t pos = getStringPos(nLine, nChar);
+        if (m_text.size() == 0)
         {
-            size_t pos = getStringPos(nLine, nChar);
+            return;
+        }
+        if (forward && (pos < m_text.size()))
+        {
             m_text.erase(pos, 1);
         }
-        else
+        else if (pos > 0)
         {
-            size_t pos = getStringPos(nLine, nChar-1);
-            m_text.erase(pos, 1);   
+            m_text.erase(pos-1, 1);   
         }
+        m_bHasChanged = true;
+        updateCounts();  
     }
 
+    void Document::removeText(const size_t nLine, const size_t nChar, const size_t len)
+    {
+        size_t start = getStringPos(nLine, nChar);
+
+        if ((start + len) > m_text.size())
+        {
+            return;
+        }
+        m_text.erase(start, len);
+        m_bHasChanged = true;
+        updateCounts();
+    }
+
+    void Document::removeText(const size_t nLine1, const size_t nChar1, const size_t nLine2, const size_t nChar2)
+    {
+        size_t start = getStringPos(nLine1, nChar1);
+        size_t end = getStringPos(nLine2, nChar2);
+        size_t len = end - start + 1;
+        removeText(nLine1, nChar1, len);
+    }
+
+    // get string of a line
     std::string Document::getLineContent(const size_t nLine) const
     {
         if (m_text == "")
             return "";
-        size_t pos = m_vecLines.at(nLine).start;
-        size_t len = m_vecLines.at(nLine).len;
+        size_t pos = m_vecLineInfo.at(nLine).start;
+        size_t len = m_vecLineInfo.at(nLine).len;
         std::string lineStr = m_text.substr(pos, len);
         return lineStr;
     }
 
+    // get the longest len of lines including \n
     size_t Document::getMaxCharLength() const
     {
-        auto res = std::max_element(m_vecLines.begin(), 
-                                    m_vecLines.end(),
+        auto res = std::max_element(m_vecLineInfo.begin(), 
+                                    m_vecLineInfo.end(),
                                     [](const auto& lhs, const auto& rhs) { 
                                         return lhs.len < rhs.len; 
                                     });
@@ -132,49 +155,50 @@ namespace veditor
         m_text += "\n";
         m_text += str;
         m_LineCount++;
-        m_vecLines.push_back(LineInfo{m_text.size(), str.size(), false});
+        m_vecLineInfo.push_back(LineInfo{m_text.size(), str.size(), false});
     }
-
+    
+    // add a new line at a pos
     void Document::newLine(const size_t nLine, const size_t nChar)
     {
         m_text.insert(getStringPos(nLine, nChar), "\n");
+        m_bHasChanged = true;
         updateCounts();
     }
 
+    // based on line and column numbern return the char position in string
     size_t Document::getStringPos(const size_t nLine, const size_t nChar) const
     {
-        if (nLine == m_LineCount)
-        {
-            return m_text.size();
-        }
-        return m_vecLines[nLine].start + nChar;
+        return m_vecLineInfo[nLine].start + nChar;
     }
 
-
+    // update count based on text string
     void Document::updateCounts()
     {
-        m_vecLines.clear();
+        m_vecLineInfo.clear();
+
         size_t start = 0;
         size_t end = m_text.find('\n');
+
         while(end != std::string::npos)
         {
-            m_vecLines.push_back(LineInfo{start, end-start, true});
+            m_vecLineInfo.push_back(LineInfo{start, end-start+1, true});
             start = end + 1;
             end = m_text.find('\n', start);
         }
         
-        if (m_text.size() > start)
+        if (m_text.size() >= start)
         {
-            m_vecLines.push_back(LineInfo{start, m_text.size()-start, false});
+            m_vecLineInfo.push_back(LineInfo{start, m_text.size()-start, false});
         }
 
 
-        m_LineCount = m_vecLines.size();
+        m_LineCount = m_vecLineInfo.size();
     }
 
     bool Document::endWithBreak(size_t l)
     {
-        return m_vecLines.at(l).endBreak;
+        return m_vecLineInfo.at(l).endBreak;
     }
 
 }

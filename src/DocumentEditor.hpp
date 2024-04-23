@@ -33,7 +33,7 @@ namespace veditor
 
             void deleteChar(bool forward);
 
-            void deleteText(bool forward);
+            void deleteSelected();
 
             size_t getLineCount() const;
             std::string getLineContent(size_t l) const;

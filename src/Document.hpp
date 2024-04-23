@@ -6,6 +6,7 @@
 #include <list>
 #include <string_view>
 #include <iostream>
+#include <map>
 
 namespace veditor
 {
@@ -40,7 +41,7 @@ namespace veditor
             void removeChar(const size_t nLine, const size_t nChar, const bool forward=true);
 
             inline size_t getLineCount() const {return m_LineCount;};
-            inline size_t getCharCountInLine(size_t l) const {return m_vecLines[l].len;};
+            inline size_t getCharCountInLine(size_t l) const {return m_vecLineInfo[l].len;};
             size_t getMaxCharLength() const;
 
             std::string getLineContent(size_t line) const;
@@ -51,7 +52,8 @@ namespace veditor
 
             const std::string& getText() const;
 
-            void removeSelected();
+            void removeText(const size_t nLine, const size_t nChar, const size_t len);
+            void removeText(const size_t nLine1, const size_t nChar1, const size_t nLine2, const size_t nChar2);
 
             bool endWithBreak(size_t l);
 
@@ -62,9 +64,11 @@ namespace veditor
         private:
             bool m_bHasChanged;
             size_t m_LineCount;
-            std::vector<LineInfo> m_vecLines; // (ind_start, len_linestr)
+            std::vector<LineInfo> m_vecLineInfo; // (ind_start, len_linestr)
             std::string m_text;
             std::string m_file;
+
+            static std::map<std::string, std::string> m_specialChars;
 
     };
 
